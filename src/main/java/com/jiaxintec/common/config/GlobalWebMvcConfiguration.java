@@ -51,14 +51,24 @@ public class GlobalWebMvcConfiguration extends WebMvcConfigurationSupport
     }
 
     @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        MappingJackson2HttpMessageConverter converter = null;
+        for (HttpMessageConverter<?> httpMessageConverter : converters) {
+            if (httpMessageConverter instanceof  MappingJackson2HttpMessageConverter) {
+                converter = (MappingJackson2HttpMessageConverter) httpMessageConverter;
+                break;
+            }
+        }
         ObjectMapper mapper = new ObjectMapper();
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
+
+        if (converter == null) {
+            converter = new MappingJackson2HttpMessageConverter(mapper);
+        }
         SimpleModule simpleModule = new SimpleModule();
         simpleModule.addSerializer(Long.class, ToStringSerializer.instance);
         simpleModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
@@ -68,7 +78,7 @@ public class GlobalWebMvcConfiguration extends WebMvcConfigurationSupport
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
         // mapper.setTimeZone(TimeZone.getTimeZone("GMT+8"));
         converter.setObjectMapper(mapper);
-        converters.add(converter);
+//        converters.add(converter);
     }
 
 }

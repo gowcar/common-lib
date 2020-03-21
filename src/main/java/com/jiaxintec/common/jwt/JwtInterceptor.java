@@ -33,6 +33,21 @@ public class JwtInterceptor implements HandlerInterceptor
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object object) {
+        if (!(object instanceof HandlerMethod)) {
+            return true;
+        }
+
+        HandlerMethod handlerMethod = (HandlerMethod) object;
+        Method method = handlerMethod.getMethod();
+        Class clz = method.getDeclaringClass();
+        PassThrough declaredAnnotation = method.getDeclaredAnnotation(PassThrough.class);
+        if (declaredAnnotation != null) return true;
+        if ( !clz.getName().endsWith("Controller") || !clz.getName().startsWith("com.jiaxintec")) {
+            return true;
+        }
+        if (request.getRequestURL().toString().contains("swagger")) {
+            return true;
+        }
 
         String origin = request.getHeader(HttpHeaders.ORIGIN);
         String headers = request.getHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
@@ -45,22 +60,6 @@ public class JwtInterceptor implements HandlerInterceptor
             }
             response.addHeader("Access-Control-Max-Age", "3600");
         }
-        if (!(object instanceof HandlerMethod)) {
-            return true;
-        }
-
-        HandlerMethod handlerMethod = (HandlerMethod) object;
-        Method method = handlerMethod.getMethod();
-        Class clz = method.getDeclaringClass();
-        if ( !clz.getName().endsWith("Controller") || !clz.getName().startsWith("com.jiaxintec")) {
-            return true;
-        }
-        if (request.getRequestURL().toString().contains("swagger")) {
-            return true;
-        }
-
-        PassThrough declaredAnnotation = method.getDeclaredAnnotation(PassThrough.class);
-        if (declaredAnnotation != null) return true;
 
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.isEmpty(token)) {
