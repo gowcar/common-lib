@@ -22,7 +22,7 @@ public class HttpExceptionHandler
         if (ex.getCause() != null) {
             cause = ex.getCause();
         }
-        log.error(ex.getMessage(), cause);
+        log.error(cause.getMessage());
         Response<Object> response = new Response<>();
         response.setCode(ex.getCode());
         response.setMessage(ex.getMessage());
@@ -35,7 +35,7 @@ public class HttpExceptionHandler
         if (ex.getCause() != null) {
             cause = ex.getCause();
         }
-        log.error(ex.getMessage(), cause);
+        log.error(cause.getMessage());
         Response<Object> response = new Response<>();
         response.setCode(ex.getCode());
         response.setMessage(ex.getMessage());
