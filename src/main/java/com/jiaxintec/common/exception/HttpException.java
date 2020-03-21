@@ -17,10 +17,6 @@ public class HttpException extends RuntimeException
         this(500, message);
     }
 
-    public HttpException(String message, Throwable cause) {
-        this(500, message, cause);
-    }
-
     public HttpException(int code, String message) {
         super(message);
         this.code = code;
