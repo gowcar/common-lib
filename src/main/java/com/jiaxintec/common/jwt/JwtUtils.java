@@ -3,6 +3,7 @@ package com.jiaxintec.common.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.Instant;
@@ -14,6 +15,7 @@ import java.util.Date;
  * Create Time: 2019-10-02 上午4:54
  * Description:
  */
+@Slf4j
 public class JwtUtils {
     private static String PRIVATE_KEY = "ACy5YqxZB1uWSwcVLSNLcA==";
     private static final Long EXPIRED = 30 * 24 * 60 * 60 * 1000L;
@@ -31,6 +33,7 @@ public class JwtUtils {
     public static String makeToken(Long uid, String content, HttpServletResponse response) {
         String token = makeToken(uid, content);
         response.setHeader("Authorization", token);
+        log.debug("设置了token : {}", token);
         return token;
     }
 
