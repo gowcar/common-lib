@@ -30,7 +30,7 @@ public class JwtUtils {
 
     public static String makeToken(Long uid, String content, HttpServletResponse response) {
         String token = makeToken(uid, content);
-        response.setHeader("token", token);
+        response.setHeader("Authorization", token);
         return token;
     }
 

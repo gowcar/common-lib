@@ -74,8 +74,7 @@ public class JwtInterceptor implements HandlerInterceptor
             throw new HttpException(401, "token已经失效，请重新登录");
         }
         if ((jwt.getExpiredAt() - System.currentTimeMillis()) < 5 * 60 * 1000) {
-            String newToken = JwtUtils.makeToken(jwt.getUid(), jwt.getContent());
-            response.setHeader("token", newToken);
+            String newToken = JwtUtils.makeToken(jwt.getUid(), jwt.getContent(), response);
             jwt = decode(newToken);
         }
         JwtContext.setJwt(jwt);
