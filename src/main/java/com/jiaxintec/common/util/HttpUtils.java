@@ -12,6 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
 
 /**
  * Class Name:  HttpUtils
@@ -43,6 +44,17 @@ public class HttpUtils
         return request(url, HttpMethod.GET, entity, responseType);
     }
 
+    public static <M> M getRequest(String url, Map<String, String> cookies, Class<M> responseType) {
+        if (cookies != null && cookies.size() > 0) {
+            StringBuilder buf = new StringBuilder();
+            for (Map.Entry<String, String> cookie : cookies.entrySet()) {
+                buf.append(cookie.getKey()).append("=").append(cookie.getValue()).append(";");
+            }
+            headers.set("Cookie", buf.toString());
+        }
+        HttpEntity<Object> entity = new HttpEntity((Object)null, headers);
+        return request(url, HttpMethod.GET, entity, responseType);
+    }
     public static <M> M getRequest(String url, ParameterizedTypeReference<M> responseType) {
         HttpEntity<Object> entity = new HttpEntity((Object)null, headers);
         return request(url, HttpMethod.GET, entity, responseType);
@@ -75,6 +87,21 @@ public class HttpUtils
     public static <M> M postRequest(String url, Object body, Class<M> responseType) {
         HttpEntity<Object> entity = new HttpEntity(body, headers);
         return request(url, HttpMethod.POST, entity, responseType);
+    }
+
+    public static <M> ResponseEntity postRequestWithEntity(String url, Object body, Map<String, String> cookies, Class<M> responseType) {
+        HttpHeaders newHeaders = new HttpHeaders();
+        newHeaders.putAll(headers);
+        if (cookies != null && cookies.size() > 0) {
+            StringBuilder buf = new StringBuilder();
+            for (Map.Entry<String, String> cookie : cookies.entrySet()) {
+                buf.append(cookie.getKey()).append("=").append(cookie.getValue()).append(";");
+            }
+            newHeaders.set("Cookie", buf.toString());
+        }
+        newHeaders.set("Content-Type", "application/x-www-form-urlencoded");
+        HttpEntity<Object> entity = new HttpEntity(body, newHeaders);
+        return requestWithEntity(url, HttpMethod.POST, entity, responseType);
     }
 
     public static <M> M deleteRequest(String url, Object body, Class<M> responseType) {
@@ -117,11 +144,17 @@ public class HttpUtils
         return result.getBody();
     }
 
+    private static <M> ResponseEntity<M> requestWithEntity(String url, HttpMethod method, HttpEntity entity, Class<M> responseType) {
+        ResponseEntity<M> result = restTemplate.exchange(url, method, entity, responseType, new Object[0]);
+        return result;
+    }
+
     public static byte[] exec(
             String uri,
             HttpMethod method,
             MediaType mediaType,
             String chartSet,
+            Map<String, String> cookies,
             byte[] params
     ) throws Exception {
         URL url = new URL(uri);
@@ -130,14 +163,23 @@ public class HttpUtils
         connection.setRequestProperty("Content-Type", mediaType.toString());
         connection.setRequestProperty("Connection", "Keep-Alive");
         connection.setRequestProperty("Charset",chartSet);
+        if (cookies != null && cookies.size() > 0) {
+            StringBuilder buf = new StringBuilder();
+            for (Map.Entry<String, String> cookie : cookies.entrySet()) {
+                buf.append(cookie.getKey()).append("=").append(cookie.getValue()).append(";");
+            }
+            connection.setRequestProperty("Cookie", buf.toString());
+        }
         connection.setUseCaches(false);
         connection.setDoOutput(true);
         connection.setDoInput(true);
 
-        DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-        out.write(params);
-        out.flush();
-        out.close();
+        if (params != null) {
+            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+            out.write(params);
+            out.flush();
+            out.close();
+        }
 
         connection.connect();
         InputStream inputStream = connection.getInputStream();
