@@ -12,6 +12,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class Name:  JwtInterceptor
@@ -74,7 +76,7 @@ public class JwtInterceptor implements HandlerInterceptor
             throw new HttpException(401, "token已经失效，请重新登录");
         }
         if ((jwt.getExpiredAt() - System.currentTimeMillis()) < 5 * 60 * 1000) {
-            String newToken = JwtUtils.makeToken(jwt.getUid(), jwt.getContent(), response);
+            String newToken = JwtUtils.makeToken(jwt.getUid(), jwt.getContent(), jwt.getAttrs(), response);
             jwt = decode(newToken);
         }
         JwtContext.setJwt(jwt);
@@ -89,6 +91,11 @@ public class JwtInterceptor implements HandlerInterceptor
                     .expiredAt(jwtData.getExpiresAt().getTime())
                     .content(jwtData.getClaim("content").asString())
                     .build();
+            if (jwtData.getClaims() != null && jwtData.getClaims().size() > 0) {
+                Map<String, String> attrs = new HashMap<>();
+                jwtData.getClaims().forEach((k,v) -> attrs.put(k, v.asString()));
+                jwt.setAttrs(attrs);
+            }
             return jwt;
         } catch (JWTDecodeException j) {
             throw new HttpException(401, "token已经失效，请重新登录");
