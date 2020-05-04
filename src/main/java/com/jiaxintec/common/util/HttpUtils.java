@@ -1,5 +1,6 @@
 package com.jiaxintec.common.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.util.MultiValueMap;
@@ -12,6 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,6 +22,7 @@ import java.util.Map;
  * Create Time: 2020-03-11 上午12:59
  * Description:
  */
+@Slf4j
 public class HttpUtils
 {
     public static RestTemplate restTemplate;
@@ -182,6 +185,13 @@ public class HttpUtils
         }
 
         connection.connect();
+
+        for (Map.Entry<String, List<String>> headers : connection.getHeaderFields().entrySet()) {
+            String h = headers.getKey();
+            String v = headers.getValue().get(0);
+            log.debug("Response Headers k -> {}, v -> {}", h, v);
+        }
+
         InputStream inputStream = connection.getInputStream();
         byte[] buffer = new byte[1024];
         int len;
