@@ -172,6 +172,7 @@ public class HttpUtils
                 buf.append(cookie.getKey()).append("=").append(cookie.getValue()).append(";");
             }
             connection.setRequestProperty("Cookie", buf.toString());
+            log.debug("Cookie is -> {}", buf.toString());
         }
         connection.setUseCaches(false);
         connection.setDoOutput(true);
