@@ -3,6 +3,7 @@ package com.jiaxintec.common.util;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
@@ -30,8 +31,16 @@ public class HttpUtils
     public final static HttpHeaders multipartFormHeaders = new HttpHeaders();
     public final static HttpHeaders formHeaders = new HttpHeaders();
 
+    private static final int CONNECTION_TIMEOUT = 10 * 1000;
+    private static final int READ_TIMEOUT = 10 * 1000;
+
     static {
-        restTemplate = new RestTemplate();
+        HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+        httpRequestFactory.setConnectionRequestTimeout(CONNECTION_TIMEOUT);
+        httpRequestFactory.setConnectTimeout(CONNECTION_TIMEOUT);
+        httpRequestFactory.setReadTimeout(READ_TIMEOUT);
+        restTemplate = new RestTemplate(httpRequestFactory);
+
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         formHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         formHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -177,6 +186,8 @@ public class HttpUtils
         connection.setUseCaches(false);
         connection.setDoOutput(true);
         connection.setDoInput(true);
+        connection.setConnectTimeout(CONNECTION_TIMEOUT);
+        connection.setReadTimeout(READ_TIMEOUT);
 
         if (params != null) {
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
