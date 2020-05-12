@@ -52,7 +52,7 @@ public class HttpUtils
     }
 
     public static <M> M getRequest(String url, Class<M> responseType) {
-        HttpEntity<Object> entity = new HttpEntity((Object)null, headers);
+        HttpEntity<Object> entity = new HttpEntity((Object) null, headers);
         return request(url, HttpMethod.GET, entity, responseType);
     }
 
@@ -64,11 +64,12 @@ public class HttpUtils
             }
             headers.set("Cookie", buf.toString());
         }
-        HttpEntity<Object> entity = new HttpEntity((Object)null, headers);
+        HttpEntity<Object> entity = new HttpEntity((Object) null, headers);
         return request(url, HttpMethod.GET, entity, responseType);
     }
+
     public static <M> M getRequest(String url, ParameterizedTypeReference<M> responseType) {
-        HttpEntity<Object> entity = new HttpEntity((Object)null, headers);
+        HttpEntity<Object> entity = new HttpEntity((Object) null, headers);
         return request(url, HttpMethod.GET, entity, responseType);
     }
 
@@ -77,8 +78,8 @@ public class HttpUtils
     }
 
     public static <M> ArrayList<M> getListRequest(String url, ParameterizedTypeReference<ArrayList<M>> reference) {
-        HttpEntity<Object> entity = new HttpEntity((Object)null, headers);
-        return (ArrayList)request(url, HttpMethod.GET, entity, reference);
+        HttpEntity<Object> entity = new HttpEntity((Object) null, headers);
+        return (ArrayList) request(url, HttpMethod.GET, entity, reference);
     }
 
     public static <M> M postRequest(String url, Object body, ParameterizedTypeReference<M> responseType) {
@@ -88,11 +89,11 @@ public class HttpUtils
 
     public static <M> ArrayList<M> postListRequest(String url, Object body, ParameterizedTypeReference<ArrayList<M>> reference) {
         HttpEntity<Object> entity = new HttpEntity(body, headers);
-        return (ArrayList)request(url, HttpMethod.POST, entity, reference);
+        return (ArrayList) request(url, HttpMethod.POST, entity, reference);
     }
 
     public static <M> M postRequest(String url, Class<M> responseType) {
-        HttpEntity<Object> entity = new HttpEntity((Object)null, headers);
+        HttpEntity<Object> entity = new HttpEntity((Object) null, headers);
         return request(url, HttpMethod.POST, entity, responseType);
     }
 
@@ -122,7 +123,7 @@ public class HttpUtils
     }
 
     public static void deleteRequest(String url) {
-        HttpEntity<Object> entity = new HttpEntity((Object)null, headers);
+        HttpEntity<Object> entity = new HttpEntity((Object) null, headers);
         request(url, HttpMethod.DELETE, entity, Object.class);
     }
 
@@ -167,6 +168,7 @@ public class HttpUtils
             MediaType mediaType,
             String chartSet,
             Map<String, String> cookies,
+            Map<String, List<String>> responseHeaders,
             byte[] params
     ) throws Exception {
         URL url = new URL(uri);
@@ -174,7 +176,7 @@ public class HttpUtils
         connection.setRequestMethod(method.name());
         connection.setRequestProperty("Content-Type", mediaType.toString());
         connection.setRequestProperty("Connection", "Keep-Alive");
-        connection.setRequestProperty("Charset",chartSet);
+        connection.setRequestProperty("Charset", chartSet);
         if (cookies != null && cookies.size() > 0) {
             StringBuilder buf = new StringBuilder();
             for (Map.Entry<String, String> cookie : cookies.entrySet()) {
@@ -198,10 +200,13 @@ public class HttpUtils
 
         connection.connect();
 
-        for (Map.Entry<String, List<String>> headers : connection.getHeaderFields().entrySet()) {
-            String h = headers.getKey();
-            String v = headers.getValue().get(0);
-            log.debug("Response Headers k -> {}, v -> {}", h, v);
+        if (responseHeaders != null) {
+            for (Map.Entry<String, List<String>> headers : connection.getHeaderFields().entrySet()) {
+                String h = headers.getKey();
+                List<String> v = headers.getValue();
+                log.debug("Response Headers k -> {}, v -> {}", h, v);
+                responseHeaders.put(h, v);
+            }
         }
 
         InputStream inputStream = connection.getInputStream();
