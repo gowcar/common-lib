@@ -1,9 +1,14 @@
 package com.jiaxintec.common.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
@@ -160,6 +165,17 @@ public class HttpUtils
     private static <M> ResponseEntity<M> requestWithEntity(String url, HttpMethod method, HttpEntity entity, Class<M> responseType) {
         ResponseEntity<M> result = restTemplate.exchange(url, method, entity, responseType, new Object[0]);
         return result;
+    }
+
+    public static  <M> M upload(String url, byte[] data, Class<M> responseType) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.setConnection("Keep-Alive");
+        headers.setCacheControl("no-cache");
+        ByteArrayResource resource = new ByteArrayResource(data);
+        HttpEntity<ByteArrayResource> httpEntity = new HttpEntity<>(resource);
+        ResponseEntity<M> result = restTemplate.postForEntity(url, httpEntity, responseType);
+        return result.getBody();
     }
 
     public static byte[] exec(
