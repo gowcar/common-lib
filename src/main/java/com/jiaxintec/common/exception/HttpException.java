@@ -11,22 +11,20 @@ import lombok.Data;
 @Data
 public class HttpException extends RuntimeException
 {
+    private int status;
     private int code;
 
-    public HttpException(String message) {
-        this(500, message);
-    }
-
-    public HttpException(int code, String message) {
+    public HttpException(int status, int code, String message) {
         super(message);
+        this.status = status;
         this.code = code;
     }
 
-    public HttpException(int code, String message, Throwable cause) {
+    public HttpException(int status, int code, String message, Throwable cause) {
         super(message, cause);
+        this.status = status;
         this.code = code;
     }
-
 }
 
 

@@ -1,8 +1,11 @@
 package com.jiaxintec.common.crud;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Component;
+
+import java.io.Serializable;
 
 /**
  * Class Name:  BaseDao
@@ -11,6 +14,5 @@ import org.springframework.stereotype.Component;
  * Description:
  */
 @Component
-public interface BaseDao<T, X> extends JpaRepository<T, X>, QuerydslPredicateExecutor<T> {
-
+public interface BaseDao<T extends BaseEntity, ID extends Serializable> extends JpaRepository<T, ID>, JpaSpecificationExecutor, QuerydslPredicateExecutor<T> {
 }

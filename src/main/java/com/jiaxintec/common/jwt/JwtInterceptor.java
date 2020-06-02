@@ -3,7 +3,7 @@ package com.jiaxintec.common.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.jiaxintec.common.exception.HttpException;
+import com.jiaxintec.common.exception.Http400Exception;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.method.HandlerMethod;
@@ -65,15 +65,15 @@ public class JwtInterceptor implements HandlerInterceptor
 
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.isEmpty(token)) {
-            throw new HttpException(401, "无效token，请登录");
+            throw new Http400Exception(401, "无效token，请登录");
         }
 
         if (!JwtUtils.verify(token)) {
-            throw new HttpException(401, "token验证失败，请重新登录");
+            throw new Http400Exception(401, "token验证失败，请重新登录");
         }
         Jwt jwt = decode(token);
         if ((jwt.getExpiredAt()- System.currentTimeMillis()) < 0) {
-            throw new HttpException(401, "token已经失效，请重新登录");
+            throw new Http400Exception(401, "token已经失效，请重新登录");
         }
         if ((jwt.getExpiredAt() - System.currentTimeMillis()) < 5 * 60 * 1000) {
             String newToken = JwtUtils.makeToken(jwt.getUid(), jwt.getContent(), jwt.getAttrs(), response);
@@ -98,7 +98,7 @@ public class JwtInterceptor implements HandlerInterceptor
             }
             return jwt;
         } catch (JWTDecodeException j) {
-            throw new HttpException(401, "token已经失效，请重新登录");
+            throw new Http400Exception(401, "token已经失效，请重新登录");
         }
     }
 }

@@ -26,7 +26,7 @@ public class HttpExceptionHandler
         Response<Object> response = new Response<>();
         response.setCode(ex.getCode());
         response.setMessage(ex.getMessage());
-        return ResponseEntity.status(ex.getCode()).body(response);
+        return ResponseEntity.status(ex.getStatus()).body(response);
     }
 
     @ExceptionHandler(ServiceException.class)
@@ -39,7 +39,7 @@ public class HttpExceptionHandler
         Response<Object> response = new Response<>();
         response.setCode(ex.getCode());
         response.setMessage(ex.getMessage());
-        return ResponseEntity.status(ex.getCode()).body(response);
+        return ResponseEntity.status(ex.getStatus()).body(response);
     }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Response<Object>> handleException(Exception ex) {

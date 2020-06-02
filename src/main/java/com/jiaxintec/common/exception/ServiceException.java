@@ -11,24 +11,34 @@ import lombok.Data;
 @Data
 public class ServiceException extends RuntimeException
 {
+    private int status;
     private int code;
 
     public ServiceException(String message) {
         this(500, message);
     }
 
-    public ServiceException(Throwable cause) {
-        this(500, cause.getMessage(), cause);
+    public ServiceException(String message, Throwable cause) {
+        this(500, message, cause);
     }
 
     public ServiceException(int code, String message) {
+        this(500, code, message);
+    }
+
+    public ServiceException(int status, int code, String message) {
         super(message);
+        this.status = status;
         this.code = code;
     }
 
     public ServiceException(int code, String message, Throwable cause) {
-        super(message, cause);
-        this.code = code;
+        this(500, code, message, cause);
     }
 
+    public ServiceException(int status, int code, String message, Throwable cause) {
+        super(message, cause);
+        this.status = status;
+        this.code = code;
+    }
 }
