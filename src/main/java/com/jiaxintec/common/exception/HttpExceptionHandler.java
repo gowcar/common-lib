@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * Class Name:  ExceptionHandler
  * Author:      Jacky Zhang
@@ -46,7 +48,14 @@ public class HttpExceptionHandler
         log.error(ex.getMessage(), ex);
         Response<Object> response = new Response<>();
         response.setCode(500);
-        response.setMessage("服务器错误，请联系管理员");
+        String msg = ex.getMessage();
+        if (ex instanceof InvocationTargetException) {
+            msg = ((InvocationTargetException)ex).getCause().getMessage();
+        }
+        if (ex.getMessage() == null) {
+            msg = "服务器端未知错误";
+        }
+        response.setMessage(msg);
         return ResponseEntity.status(500).body(response);
     }
 }

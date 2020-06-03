@@ -1,11 +1,22 @@
 package com.jiaxintec.common.crud;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.EntityPathBase;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.apache.commons.lang3.text.WordUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+import javax.persistence.EntityManager;
 import java.io.Serializable;
+import java.util.Optional;
 
 /**
  * Class Name:  BaseDao
@@ -14,5 +25,73 @@ import java.io.Serializable;
  * Description:
  */
 @Component
-public interface BaseDao<T extends BaseEntity, ID extends Serializable> extends JpaRepository<T, ID>, JpaSpecificationExecutor, QuerydslPredicateExecutor<T> {
+public class BaseDao<T extends BaseEntity<ID>, ID extends Serializable>
+{
+    @Resource
+    private EntityManager em;
+    @Autowired
+    private JPAQueryFactory jpaQueryFactory;
+
+    private Class<T> domainType;
+
+    public Optional<T> findById(ID id) {
+        Optional<T> opt = Optional.ofNullable(em.find(domainType, id));
+        return opt;
+    }
+
+    public T save(T t) {
+        if (em.contains(t)) {
+            t = em.merge(t);
+        } else {
+            em.persist(t);
+        }
+        return findOne(t.getId());
+    }
+
+    public T findOne(ID id) {
+        return em.getReference(domainType, id);
+    }
+
+    public Class<T> domainType() {
+        return domainType;
+    }
+
+    public void delete(T t) {
+        em.remove(em.contains(t) ? t: em.merge(t));
+    }
+
+
+    public QueryResults<T> query(
+            Expression[] selector,
+            Predicate filter,
+            OrderSpecifier order,
+            int start,
+            int limit) {
+        String varible = WordUtils.uncapitalize(domainType.getSimpleName());
+        EntityPathBase entityPathBase = new EntityPathBase(domainType, varible);
+
+        JPAQuery<T> query;
+        if (selector != null) {
+            query = jpaQueryFactory.select(Projections.bean(domainType, selector));
+        } else {
+            query = jpaQueryFactory.select(entityPathBase);
+        }
+        query = query.from(entityPathBase);
+        if (filter != null) {
+            query = query.where(filter);
+        }
+        if (order != null) {
+            query = query.orderBy(order);
+        }
+
+        QueryResults<T> results = query
+                .offset(start)
+                .limit(limit)
+                .fetchResults();
+        return results;
+    }
+
+    public void setDomainType(Class<T> domainType) {
+        this.domainType = domainType;
+    }
 }
