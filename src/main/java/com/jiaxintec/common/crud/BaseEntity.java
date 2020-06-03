@@ -21,7 +21,7 @@ import java.util.Date;
  */
 @Data
 @MappedSuperclass
-public class BaseEntity<X extends Serializable> implements Serializable
+public class BaseEntity<X> implements Serializable
 {
     @Id
     @Column(nullable = false)
