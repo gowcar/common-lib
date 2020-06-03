@@ -42,8 +42,11 @@ public class JwtInterceptor implements HandlerInterceptor
         HandlerMethod handlerMethod = (HandlerMethod) object;
         Method method = handlerMethod.getMethod();
         Class clz = method.getDeclaringClass();
-        PassThrough declaredAnnotation = method.getDeclaredAnnotation(PassThrough.class);
+        PassThrough declaredAnnotation = (PassThrough) clz.getDeclaredAnnotation(PassThrough.class);
         if (declaredAnnotation != null) return true;
+        declaredAnnotation = method.getDeclaredAnnotation(PassThrough.class);
+        if (declaredAnnotation != null) return true;
+
         if ( !clz.getName().endsWith("Controller") || !clz.getName().startsWith("com.jiaxintec")) {
             return true;
         }

@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * Create Time: 2020-03-21 下午2:26
  * Description:
  */
-@Target({ElementType.METHOD})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PassThrough
 {

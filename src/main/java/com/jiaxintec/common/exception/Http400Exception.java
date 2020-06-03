@@ -11,9 +11,6 @@ import lombok.Data;
 @Data
 public class Http400Exception extends HttpException
 {
-    private int status;
-    private int code;
-
     public Http400Exception(String message) {
         this(400, message);
     }

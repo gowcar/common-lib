@@ -11,9 +11,6 @@ import lombok.Data;
 @Data
 public class Http500Exception extends HttpException
 {
-    private int status;
-    private int code;
-
     public Http500Exception(String message) {
         this(500, message);
     }

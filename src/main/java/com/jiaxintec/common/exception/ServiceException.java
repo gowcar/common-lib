@@ -18,6 +18,10 @@ public class ServiceException extends RuntimeException
         this(500, message);
     }
 
+    public ServiceException(Throwable t) {
+        this(500, t.getMessage(), t);
+    }
+
     public ServiceException(String message, Throwable cause) {
         this(500, message, cause);
     }
