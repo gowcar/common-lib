@@ -38,9 +38,9 @@ public abstract class BaseController<T extends BaseEntity<ID>, ID extends Serial
     @Transactional(rollbackFor = Exception.class)
     public Response create(@RequestBody T info) throws Exception {
         try {
+            before(info, Operation.CREATE);
             T entity = domainType().newInstance();
             BeanUtils.copyPropertiesIgnoreNull(info, entity);
-            validate(entity);
             dao.save(entity);
         } catch (Exception e) {
             log.error("创建对象出错", e);
@@ -55,11 +55,9 @@ public abstract class BaseController<T extends BaseEntity<ID>, ID extends Serial
     @PostMapping("/{id}")
     @Transactional(rollbackFor = Exception.class)
     public Response update(@PathVariable ID id, @RequestBody T info) throws Throwable {
-        Optional<T> opt = dao.findById(id);
-        log.debug("Optional is {}", opt.isPresent());
         T t = dao.findById(id).orElseThrow(() -> new Http500Exception(90002, "指定的实体不存在"));
         try {
-            validate(info);
+            before(info, Operation.UPDATE);
             BeanUtils.copyPropertiesIgnoreNull(info, t);
             dao.save(t);
         } catch (Exception e) {
@@ -77,13 +75,16 @@ public abstract class BaseController<T extends BaseEntity<ID>, ID extends Serial
         return entityClass;
     }
 
-    protected void validate(T entity) {
+    protected void before(T entity, Operation operation) {
+    }
+    protected void after(T entity, Operation operation) {
     }
 
     @DeleteMapping("/{id}")
     @Transactional(rollbackFor = Exception.class)
     public Response delete(@PathVariable ID id) throws Throwable {
         T t = dao.findById(id).orElseThrow(() -> new Http500Exception(90002, "指定的实体不存在"));
+        before(t, Operation.DELETE);
         try {
             dao.delete(t);
         } catch (Exception e) {
@@ -108,6 +109,10 @@ public abstract class BaseController<T extends BaseEntity<ID>, ID extends Serial
             @RequestParam(required = false, defaultValue = "20") int limit
             ) {
         return Response.success(dao.query(null, null, null, start, limit));
+    }
+
+    protected enum Operation {
+        CREATE, RETRIEVE, UPDATE, DELETE
     }
 
 }

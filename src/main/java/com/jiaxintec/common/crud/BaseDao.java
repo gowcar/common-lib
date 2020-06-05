@@ -1,7 +1,6 @@
 package com.jiaxintec.common.crud;
 
 import com.querydsl.core.QueryResults;
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
@@ -68,6 +67,7 @@ public class BaseDao<T extends BaseEntity<ID>, ID extends Serializable>
             int start,
             int limit) {
         String varible = WordUtils.uncapitalize(domainType.getSimpleName());
+
         EntityPathBase entityPathBase = new EntityPathBase(domainType, varible);
 
         JPAQuery<T> query;
